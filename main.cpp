@@ -70,17 +70,6 @@ void heapify(int input[],int i, int h){
   }
 }
 void print(int tree[], int i, int depth){
-  /*for(int i = 0; i < depth; i++){
-    cout << "\t";
-  }
-  cout << tree[i-1] << endl;
-  int next = i * 2;
-  if(tree[next-1] !=0){
-    print(tree, next, depth+1);
-  }
-  if(tree[next] != 0){
-    print(tree, next+1, depth+1);
-  }*/
   for (i;tree[i]!=tree[0];i--){
 
   }
