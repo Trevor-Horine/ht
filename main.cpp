@@ -1,148 +1,253 @@
-/*this is a max heap program
+/*this is a hash table that implements chaining to deal with multiple ocurances.
  *Trevor Horine
- *3/9/18
+ *05/31/2018
  */
+
 #include <iostream>
 #include <cstring>
+#include <time.h>
+#include <stdlib.h>
 #include <fstream>
-#include "node.h"
 #include <math.h>
 
 using namespace std;
+//this is the node struct
+struct node{
+  node* next = NULL;
+  node* last = NULL;
+  char* namef = NULL;
+  char* namel = NULL;
+  int id = NULL;
+  float gpa = NULL;
+};
 
-int parent (int);
-int left(int);
-int right(int);
-void heapify(int[], int, int);
-void mktree(node*, int[], int, int);
-void print(node*, int, int);
-void out(int[], int);
-//main mentod
-int main(){
-  int input[100] = {0};
-  char in[400];
-  int current = 0;
-  node* root = new node();
-  node* start = new node();
-  cout << "Enter up to 100 numbers that range between 1 and 1000 with a space between each one OR enter a file name including the .txt." << endl;
-  cin.getline(in, 400);
-  if (isalpha(in[0])){
-    ifstream file;
-    file.open(in);
-    file.getline(in, 400);
-    file.close();
-  }
-  int i = 0;
-  char *s = strtok(in, " ");
-  while (s) {
-    if (i < 400) {
-      input[i++] = atoi(s);
+void hashtable(node** &hash, int &size, node* temp);
+// this it the print function
+void print(node** hash, int size){
+  for(int p = 0; p < size; p++){
+    cout << p << endl;
+    if(hash[p] != NULL){
+      cout << " " << hash[p] -> namef << " " << hash[p] -> namel << " Id: " << hash[p] -> id << " GPA: " << hash[p] -> gpa << endl;
+      if(hash[p] -> next != NULL){
+	node* t = hash[p];
+	while(t -> next != NULL){
+	  t = t -> next;
+	  cout << " " << t -> namef << " " << t -> namel << " Id: " <<  t -> id << " GPA: " << t -> gpa << endl;
+	}
+      }
     }
-    s = strtok(NULL, " ");
   }
-  int y = i;
-  heapify(input, i, y);
-  //for(int i = 0; i < y; i++){
-  //cout << input[i] << endl;
+}
+//this gentrates a ramdome number
+int randnum(int n){
+  int r = NULL;
+  r = rand() % n;
+  return r;
+}
+// this resizes and re hashes the table
+void resize(node** &hash, int &size){
+  cout << "resize" << endl;
+  node** hold;
+  size = size*2;
+  int h = 0;
+  hold = new node*[size];
+  for(int n = 0; n < size; n++){
+    hold[n] = NULL;
+  }
+  for(int p = 0; p < (size/2); p++){
+    if(hash[p] != NULL){
+      if(hash[p] -> next != NULL){
+	hash[p] -> next = NULL;
+      }
+      hashtable(hold, size, hash[p]);
+      h++;
+      /* if(hash[p] -> next != NULL){
+	 node* t = hash[p];
+	 while(t -> next != NULL){
+	 t = t -> next;
+	 hold[h] = t;
+	 }  
+	 }*/
+    }
+  }
+  /* for(int i = 0; i < size; i++){
+    if(hash[i] != NULL){
+      for(int j = 0; j < size/2; j++){
+	if(hold == NULL){
+	  hold[j] = hash[i];
+	}
+      }
+    }
+    if(hash[i] != NULL){
+      if(hash[i] -> next != NULL){
+	for(int j = 0; j < size/2; j++){
+	  if(hold == NULL){
+	    hold[j] = hash[i];
+	  }
+	}
+      }
+    }
+    }*/
+  hash = hold;
   //}
-  int tree[y] = {0};
-  for(int i = 0; i < y; i++){
-    tree[i] = input[i];
-    //cout << tree[i];
+}
+//this hashes students
+void hashtable(node** &hash, int &size, node* temp){
+  int count = 0;
+  //  cout <<"you have reached hash table" << endl;
+  // cout << temp -> namef << temp -> namel << " ID: " << temp -> id << " GPA: " << temp -> gpa << endl;
+  int h = randnum(size);
+  cout << h << endl;
+  if(hash[h] == NULL){
+    hash[h] = temp;
   }
-  cout << endl;
-  root -> setvalue(NULL);
-  int r = y;
-  mktree(root, tree, 0, r);
-  start = root;
-  while (start-> getright() != NULL){
-    start = start -> getright();
-  }
-  int d = log2(y+1);
-  print(root, 0, y);
-  out(tree, y);
-}
-// menthod to get parent
-int parent(int i){
-  return ((i-1)/2);
-}
-//mentod to get left
-int left(int i){
-  return((2*i)+1);
-}
-//mentod to get right
-int right(int i){
-  return((2*i)+2);
-}
-// method to heapify the tree
-void heapify(int input[],int i, int h){
-  if(i == 1){
-    if (input[1] > input[0]){
-      swap(input[1], input[0]);
-    }
-  }
-  else{
-    for(int i = 0; i < h; i++){
-      int par = input[i];
-      int lc = input[left(i)];
-      int rc = input[right(i)];
-      if(left(i) < h && par < lc && lc > rc){
-	swap(input[i], input[left(i)]);
-	i = -1;
-      }
-      else if(right(i) < h && par < rc){
-	swap(input[i], input[right(i)]);
-	i = -1;
+  else if(hash[h] != NULL){
+    node* t = hash[h];
+    //    cout << t -> namel;
+    int check = 0;
+    if(t != NULL){
+      while(t != NULL){
+	check++;
+	if(t -> next != NULL){
+	  t = t -> next;
+	  count++;
+	  cout << "chaining" << count << endl;
+	}
+	else{
+	  t -> next = temp;
+	  //temp -> last = t;
+	  break;
+	}
+	if(check >= 3){
+	  resize(hash, size);
+	}
       }
     }
+    /* cout << "h" <<  h << endl << hash[h] << endl;
+       node* working = hash[h];
+       while(hash[h] != NULL){
+       if(working != NULL){
+       cout << working << endl;
+       if(working -> next != NULL){
+       cout << working -> next -> namef << endl;
+       working = working -> next;
+       count++;
+       cout << count << endl;
+       cout << "chaining" << endl;
+       }
+       else{
+       working -> next = temp;
+       temp -> prev = working;
+       break;
+       }
+       }
+       }*/
   }
+  /*  if(count >= 3){
+    resize(hash, size);
+    cout << size << endl;
+  }*/
 }
-//method to print tree
-void print(node* current, int d, int y){
-  if(current -> getleft() != NULL){
-    print(current-> getleft(), d+1, y);
-  }
-  int t = d;
-  for(t; t>0; t--){
-    cout << "\t";
-  }
-  cout << current -> getvalue() << endl;
-  if(current -> getright() != NULL){
-    print(current -> getright(), d+1, y);
-  }
+//this adds manualy entered students
+void add (node** &hash, int &size){
+  node* temp = new node();
+  char* first = new char[100];
+  char* last = new char[100];
+  int id;
+  float gpa;
+  cout << "What is the students first name?" << endl;
+  cin >> first;
+  temp -> namef = first;
+  cout << "What is the students last name?" << endl;
+  cin >> last;
+  temp -> namel = last;
+  cout << "what is the students id number?" << endl;
+  cin >> id;
+  temp -> id = id;
+  cout << "What is the students gpa?" << endl;
+  cin >> gpa;
+  temp -> gpa = gpa;
+  hashtable(hash, size, temp);
 }
-//method to make tree
-void mktree(node* current, int tree[], int y, int r){
-  if(tree[y] != 0 && y < r){
-      if (current -> getvalue() == 0){
-	current -> setvalue(tree[y]);
+//this is the randome student gentrator
+void make(node** &hash, int &size, int &masterid){
+  node* temp = new node();
+  char* in = new char[20];
+  float g;
+  ifstream file;
+  file.open("first.txt");
+  int t = randnum(10);
+  in = new char[20];
+  file.getline(in, 20);
+  for(int i = 0; i < randnum(10); i++){
+    in = new char[20];
+    file.getline(in, 20);
+  }
+  file.close();
+  temp -> namef = in;
+  ifstream last;
+  last.open("last.txt");
+  t = randnum(10);
+  in = new char[20];
+  last.getline(in,20);
+  for(int i = 0; i < t; i++){
+    in = new char[20];
+    last.getline(in, 20);
+  }
+  last.close();
+  temp -> namel = in;
+  temp -> id = masterid;
+  masterid++;
+  g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/4);
+  temp -> gpa = trunc(100 * g) / 100;
+  hashtable(hash, size, temp);
+}
+//this is main
+int main(){
+  srand (time(NULL));
+  char* in = new char[20];
+  int size = 100;
+  int nodes = 0;
+  node** hash;
+  hash = new node*[size];
+  for(int n = 0; n < size; n++){
+    hash[n] = NULL;
+  }
+  int masterid = 0;
+  bool run = true;
+  while(run  == true){
+    cout << "Do you want to add, make, print, delete, or quit?" << endl;
+    cin >> in;
+    for(int i = 0; i < 20; i++){
+      in[i] = toupper(in[i]);
     }
-      if(tree[right(y)] != 0 && right(y) < r){
-	node* t = new node();
-	t -> setvalue(tree[right(y)]);
-	t -> setprev(current);
-	current -> setright(t);
-	mktree(
-current-> getright(), tree, right(y), r);
-    }
-      if(tree[left(y)] != 0 && left(y) < r){
-	node* t = new node();
-	t -> setvalue(tree[left(y)]);
-	t -> setprev(current);
-	current -> setleft(t);
-	mktree(current -> getleft(), tree, left(y), r);
+    if(strcmp(in, "ADD") == 0){
+      add(hash, size);
+      nodes++;
+      if(nodes >= size/2){
+	resize(hash, size);
       }
-  }
-}
-//method for printing all values in order
-void out(int tree[], int y){
-  cout << tree[0] << " ";
-  swap(tree[0], tree[y]);
-  tree[y] = NULL;
-  y--;
-  int i = y;
-  heapify(tree, i, y);
-  if(tree[0] != NULL){
-    out(tree, y);
+    }
+    else if(strcmp(in, "MAKE") == 0){
+      cout << "How many students would you like to make?" << endl;
+      int n;
+      cin >> n;
+      for(int i = 0; i < n; i++){
+	make(hash, size,  masterid);
+	nodes++;
+      }
+      if(nodes >= size/2){
+	resize(hash, size);
+      }
+    }
+    else if(strcmp(in, "PRINT") == 0){
+      print(hash, size);
+    }
+    else if(strcmp(in, "DELETE") == 0){
+      // remove();
+    }
+    else if(strcmp(in, "QUIT") == 0){
+      run = false;
+    }    
   }
 }
